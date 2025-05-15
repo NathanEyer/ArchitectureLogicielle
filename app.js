@@ -4,8 +4,6 @@ const app = express();
 const port = 3000;
 
 app.set('view engine', 'ejs');
-
-// Gestion des paquets en Json
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Vérifie si un joueur a gagné
@@ -44,53 +42,70 @@ function checkDraw(board) {
     return board.every(cell => cell !== '');
 }
 
-// GET route - chargement de la page initiale
 app.get('/', (req, res) => {
-    // Plateau initialement vidé
+    res.redirect('/start');
+});
+
+app.get('/start', (req, res) => {
+    res.render('start'); // page EJS avec formulaire
+});
+
+// Chargement initial de la page 
+app.post('/start', (req, res) => {
+    const playerX = req.body.playerX.trim() !== '' ? req.body.playerX : 'Joueur X';
+    const playerO = req.body.playerO.trim() !== '' ? req.body.playerO : 'Joueur O';
     const board = ['', '', '', '', '', '', '', '', ''];
     const currentPlayer = 'X';
-    const message = "La partie commence: X commence.";
-    res.render('index', { board, currentPlayer, message, gameOver: false });
+    const message = `La partie commence : ${playerX} commence.`;
+
+    res.render('index', { board, currentPlayer, message, gameOver: false, playerX, playerO });
 });
 
 // POST route - enregistre les actions en direct
 app.post('/move', (req, res) => {
-    // The board state is passed as hidden inputs, plus the clicked cell index
     let board = [];
     for (let i = 0; i < 9; i++) {
         board[i] = req.body['cell' + i] || '';
     }
 
-    const currentPlayer = req.body.currentPlayer;
-    const moveIndex = parseInt(req.body.move);
+    // Initialisations
     let message = '';
     let gameOver = false;
+
+    // Récupération des constantes
+    const playerX = req.body.playerX;
+    const playerO = req.body.playerO;
+    const currentPlayer = req.body.currentPlayer;
+    const moveIndex = parseInt(req.body.move);
 
     // Si le jeu n'est pas fini
     if (board[moveIndex] === '') {
         board[moveIndex] = currentPlayer;
 
-        // Check if the current player has won
+        // Vérifications de l'état de la partie
         if (checkWin(board, currentPlayer)) {
-            message = `${currentPlayer} a gagné !`;
+            const winnerName = currentPlayer === 'X' ? playerX : playerO;
+            message = `${winnerName} (${currentPlayer}) a gagné !`;
             gameOver = true;
         } else if (checkDraw(board)) {
             message = `Égalité !`;
             gameOver = true;
         } else {
-            // Switch player
-            message = `${currentPlayer} a joué. Le prochain à jouer sera ${currentPlayer === 'X' ? 'O' : 'X'}.`;
+            message = `${currentPlayer} posé.`;
+            const nextPlayerName = currentPlayer === 'X' ? playerO : playerX;
+            message += ` Le prochain à jouer sera ${nextPlayerName}.`;
         }
     } else {
         message = "Opération non permise.";
     }
 
-    // Next player unless game over
+    // Prochain joueur à jouer
     const nextPlayer = gameOver ? null : (currentPlayer === 'X' ? 'O' : 'X');
 
-    res.render('index', { board, currentPlayer: nextPlayer, message, gameOver });
+    res.render('index', { board, currentPlayer: nextPlayer, message, gameOver, playerX, playerO });
 });
 
+// Affichage du lien du jeu
 app.listen(port, () => {
     console.log(`Allez sur http://localhost:${port} pour jouer.`);
 });

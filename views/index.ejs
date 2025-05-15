@@ -2,14 +2,16 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8" />
-    <title>Jeu de Morpion - BAUDOIN EYER MANGIN</title>
+    <title>Jeu de Pionmor - BAUDOIN EYER MANGIN</title>
 </head>
 <body>
 <div class="container">
-    <h1>Jeu de Morpion</h1>
+    <h1>Jeu de Pionmor</h1>
     <div class="message"><%= message %></div>
 
     <form action="/move" method="POST">
+        <input type="hidden" name="playerX" value="<%= playerX %>">
+        <input type="hidden" name="playerO" value="<%= playerO %>">
         <table>
             <% for(let row=0; row<3; row++) { %>
                 <tr>
@@ -39,7 +41,7 @@
 
         <!-- Statut de la partie -->
         <% if (!gameOver) { %>
-            <div>Joueur courant: <strong><%= currentPlayer %></strong></div>
+            <div>Joueur courant : <strong><%= currentPlayer === 'X' ? playerX : playerO %></strong></div>
             <br />
             <input type="hidden" name="currentPlayer" value="<%= currentPlayer %>">
             <input type="submit" value="Jouer ce coup" />
