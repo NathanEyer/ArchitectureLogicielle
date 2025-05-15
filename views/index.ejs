@@ -2,102 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8" />
-    <title>Jeu de Morpion</title>
-    <style>
-        /* body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: #fff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .container {
-            background: rgba(0, 0, 0, 0.7);
-            padding: 2rem;
-            border-radius: 15px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
-            text-align: center;
-            width: 350px;
-        }
-        h1 {
-            margin-bottom: 1rem;
-            font-weight: 700;
-            letter-spacing: 2px;
-            font-size: 2rem;
-        }
-        table {
-            border-collapse: collapse;
-            margin: 0 auto 1.5rem auto;
-            user-select: none;
-        }
-        td {
-            width: 90px;
-            height: 90px;
-            border: 2px solid #fff;
-            font-size: 3rem;
-            font-weight: 700;
-            vertical-align: middle;
-            text-align: center;
-            position: relative;
-            cursor: pointer;
-            background: #121212;
-            transition: background-color 0.3s ease;
-            border-radius: 10px;
-        }
-        td:hover {
-            background: #3f51b5;
-        }
-        input[type=submit] {
-            background-color: #3f51b5;
-            border: none;
-            padding: 0.8rem 1.5rem;
-            font-size: 1.1rem;
-            border-radius: 8px;
-            cursor: pointer;
-            color: white;
-            font-weight: 600;
-            transition: background-color 0.3s ease;
-        }
-        input[type=submit]:hover {
-            background-color: #283593;
-        }
-        .message {
-            font-size: 1.2rem;
-            margin-bottom: 1.2rem;
-            min-height: 2rem;
-        }
-        /* Hide checkboxes but keep them clickable via label */
-        /* input[type=radio] {
-            opacity: 0;
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            margin: 0;
-            cursor: pointer;
-            z-index: 2;
-        }
-        label {
-            display: block;
-            width: 100%;
-            height: 100%;
-            cursor: pointer;
-            user-select: none;
-        } */
-        /* Checked style */
-        /* input[type=radio]:checked + span {
-            color: #ffeb3b;
-            font-weight: 900;
-            text-shadow: 0 0 10px #ffeb3b;
-        }
-        /* Disabled style */
-        /* input[type=radio]:disabled + span {
-            cursor: default;
-            color: #666;
-        } */ */ */
-    </style>
+    <title>Jeu de Morpion - BAUDOIN EYER MANGIN</title>
 </head>
 <body>
 <div class="container">
@@ -111,20 +16,20 @@
                     <% for(let col=0; col<3; col++) {
                         const idx = row * 3 + col;
                         const cell = board[idx];
-                        const isDisabled = gameOver || (cell !== '');
                     %>
                     <td>
                         <% if (cell === '') { %>
-                            <!-- Radio input for choosing this cell -->
+                            <!-- Bouton radio pour choisir la case -->
                             <label>
-                                <input type="radio" name="move" value="<%= idx %>" <%= isDisabled ? "disabled" : "" %> required>
+                                <input type="radio" name="move" value="<%= idx %>" required>
                                 <span>&nbsp;</span>
                             </label>
                         <% } else { %>
-                            <span><%= cell %></span>
+                            <!-- X ou O selon la valeur de la case -->
+                            <span>ttt<%= cell %></span>
                         <% } %>
 
-                        <!-- Keep board state as hidden inputs -->
+                        <!-- Les valeurs du tableau sont stocké ainsi pour les redonner au back -->
                         <input type="hidden" name="cell<%= idx %>" value="<%= cell %>">
                     </td>
                     <% } %>
@@ -132,7 +37,7 @@
             <% } %>
         </table>
 
-        <!-- Current Player -->
+        <!-- Statut de la partie -->
         <% if (!gameOver) { %>
             <div>Joueur courant: <strong><%= currentPlayer %></strong></div>
             <br />
