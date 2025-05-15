@@ -34,8 +34,8 @@ app.get('/start', (req, res) => {
 
 // Chargement initial de la page 
 app.post('/start', (req, res) => {
-    const playerX = req.body.playerX;
-    const playerO = req.body.playerO;
+    const playerX = req.body.playerX.trim() !== '' ? req.body.playerX : 'Joueur X';
+    const playerO = req.body.playerO.trim() !== '' ? req.body.playerO : 'Joueur O';
     const board = ['', '', '', '', '', '', '', '', ''];
     const currentPlayer = 'X';
     const message = `La partie commence : ${playerX} commence.`;
@@ -45,24 +45,26 @@ app.post('/start', (req, res) => {
 
 // POST route - enregistre les actions en direct
 app.post('/move', (req, res) => {
-    // The board state is passed as hidden inputs, plus the clicked cell index
     let board = [];
     for (let i = 0; i < 9; i++) {
         board[i] = req.body['cell' + i] || '';
     }
 
+    // Initialisations
+    let message = '';
+    let gameOver = false;
+
+    // Récupération des constantes
     const playerX = req.body.playerX;
     const playerO = req.body.playerO;
     const currentPlayer = req.body.currentPlayer;
     const moveIndex = parseInt(req.body.move);
 
-    let message = '';
-    let gameOver = false;
-
     // Si le jeu n'est pas fini
     if (board[moveIndex] === '') {
         board[moveIndex] = currentPlayer;
 
+        // Vérifications de l'état de la partie
         if (checkWin(board, currentPlayer)) {
             const winnerName = currentPlayer === 'X' ? playerX : playerO;
             message = `${winnerName} (${currentPlayer}) a gagné !`;
@@ -79,12 +81,13 @@ app.post('/move', (req, res) => {
         message = "Opération non permise.";
     }
 
-    // Next player unless game over
+    // Prochain joueur à jouer
     const nextPlayer = gameOver ? null : (currentPlayer === 'X' ? 'O' : 'X');
 
     res.render('index', { board, currentPlayer: nextPlayer, message, gameOver, playerX, playerO });
 });
 
+// Affichage du lien du jeu
 app.listen(port, () => {
     console.log(`Allez sur http://localhost:${port} pour jouer.`);
 });
