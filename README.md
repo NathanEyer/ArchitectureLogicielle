@@ -17,3 +17,13 @@ La conception du projet est présenté dans le dossier conception du répôt.
 node JS version 18
 
 ExpressJS
+
+body-parser
+
+## Installation
+
+nmp install express body-parser ejs
+
+## Lancer le projet
+
+node app.js
