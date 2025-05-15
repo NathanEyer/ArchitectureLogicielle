@@ -105,6 +105,8 @@
     <div class="message"><%= message %></div>
 
     <form action="/move" method="POST">
+        <input type="hidden" name="playerX" value="<%= playerX %>">
+        <input type="hidden" name="playerO" value="<%= playerO %>">
         <table>
             <% for(let row=0; row<3; row++) { %>
                 <tr>
@@ -134,7 +136,7 @@
 
         <!-- Current Player -->
         <% if (!gameOver) { %>
-            <div>Joueur courant: <strong><%= currentPlayer %></strong></div>
+            <div>Joueur courant : <strong><%= currentPlayer === 'X' ? playerX : playerO %></strong></div>
             <br />
             <input type="hidden" name="currentPlayer" value="<%= currentPlayer %>">
             <input type="submit" value="Jouer ce coup" />

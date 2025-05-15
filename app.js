@@ -4,8 +4,6 @@ const app = express();
 const port = 3000;
 
 app.set('view engine', 'ejs');
-
-// Gestion des paquets en Json
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Vérifie si un joueur a gagné
@@ -26,13 +24,23 @@ function checkDraw(board) {
     return board.every(cell => cell !== '');
 }
 
-// GET route - chargement de la page initiale
 app.get('/', (req, res) => {
-    // Plateau initialement vidé
+    res.redirect('/start');
+});
+
+app.get('/start', (req, res) => {
+    res.render('start'); // page EJS avec formulaire
+});
+
+// Chargement initial de la page 
+app.post('/start', (req, res) => {
+    const playerX = req.body.playerX;
+    const playerO = req.body.playerO;
     const board = ['', '', '', '', '', '', '', '', ''];
     const currentPlayer = 'X';
-    const message = "La partie commence: X commence.";
-    res.render('index', { board, currentPlayer, message, gameOver: false });
+    const message = `La partie commence : ${playerX} commence.`;
+
+    res.render('index', { board, currentPlayer, message, gameOver: false, playerX, playerO });
 });
 
 // POST route - enregistre les actions en direct
@@ -43,8 +51,11 @@ app.post('/move', (req, res) => {
         board[i] = req.body['cell' + i] || '';
     }
 
+    const playerX = req.body.playerX;
+    const playerO = req.body.playerO;
     const currentPlayer = req.body.currentPlayer;
     const moveIndex = parseInt(req.body.move);
+
     let message = '';
     let gameOver = false;
 
@@ -52,16 +63,17 @@ app.post('/move', (req, res) => {
     if (board[moveIndex] === '') {
         board[moveIndex] = currentPlayer;
 
-        // Check if the current player has won
         if (checkWin(board, currentPlayer)) {
-            message = `${currentPlayer} a gagné !`;
+            const winnerName = currentPlayer === 'X' ? playerX : playerO;
+            message = `${winnerName} (${currentPlayer}) a gagné !`;
             gameOver = true;
         } else if (checkDraw(board)) {
             message = `Égalité !`;
             gameOver = true;
         } else {
-            // Switch player
-            message = `${currentPlayer} a joué. Le prochain à jouer sera ${currentPlayer === 'X' ? 'O' : 'X'}.`;
+            message = `${currentPlayer} posé.`;
+            const nextPlayerName = currentPlayer === 'X' ? playerO : playerX;
+            message += ` Le prochain à jouer sera ${nextPlayerName}.`;
         }
     } else {
         message = "Opération non permise.";
@@ -70,7 +82,7 @@ app.post('/move', (req, res) => {
     // Next player unless game over
     const nextPlayer = gameOver ? null : (currentPlayer === 'X' ? 'O' : 'X');
 
-    res.render('index', { board, currentPlayer: nextPlayer, message, gameOver });
+    res.render('index', { board, currentPlayer: nextPlayer, message, gameOver, playerX, playerO });
 });
 
 app.listen(port, () => {
