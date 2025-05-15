@@ -5,36 +5,37 @@ const port = 3000;
 
 app.set('view engine', 'ejs');
 
-// Middleware to parse urlencoded form data
+// Gestion des paquets en Json
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Function to check if a player has won
+// Vérifie si un joueur a gagné
 function checkWin(board, player) {
     const lines = [
-        [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
-        [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
-        [0, 4, 8], [2, 4, 6]             // diagonals
+        [0, 1, 2], [3, 4, 5], [6, 7, 8], // lignes
+        [0, 3, 6], [1, 4, 7], [2, 5, 8], // colonnes
+        [0, 4, 8], [2, 4, 6]             // diagonales
     ];
     return lines.some(line =>
         line.every(index => board[index] === player)
     );
+    // Boucle vérifier qu'une des combinaisons est remplie dans board
 }
 
-// Function to check if the board is full (draw)
+// Vérifie qu'il reste des cases à remplir
 function checkDraw(board) {
     return board.every(cell => cell !== '');
 }
 
-// GET route - initial load or refreshed page
+// GET route - chargement de la page initiale
 app.get('/', (req, res) => {
-    // Initial empty board is 9 empty strings
+    // Plateau initialement vidé
     const board = ['', '', '', '', '', '', '', '', ''];
     const currentPlayer = 'X';
-    const message = "Game start: Player X begins.";
+    const message = "La partie commence: X commence.";
     res.render('index', { board, currentPlayer, message, gameOver: false });
 });
 
-// POST route - to handle moves
+// POST route - enregistre les actions en direct
 app.post('/move', (req, res) => {
     // The board state is passed as hidden inputs, plus the clicked cell index
     let board = [];
@@ -47,23 +48,23 @@ app.post('/move', (req, res) => {
     let message = '';
     let gameOver = false;
 
-    // If chosen cell is empty and game not over, apply the move
+    // Si le jeu n'est pas fini
     if (board[moveIndex] === '') {
         board[moveIndex] = currentPlayer;
 
         // Check if the current player has won
         if (checkWin(board, currentPlayer)) {
-            message = `Player ${currentPlayer} wins!`;
+            message = `${currentPlayer} a gagné !`;
             gameOver = true;
         } else if (checkDraw(board)) {
-            message = `Game is a draw!`;
+            message = `Égalité !`;
             gameOver = true;
         } else {
             // Switch player
-            message = `Player ${currentPlayer} played. Next player is ${currentPlayer === 'X' ? 'O' : 'X'}.`;
+            message = `${currentPlayer} a joué. Le prochain à jouer sera ${currentPlayer === 'X' ? 'O' : 'X'}.`;
         }
     } else {
-        message = "Invalid move, cell already taken.";
+        message = "Opération non permise.";
     }
 
     // Next player unless game over
@@ -73,5 +74,5 @@ app.post('/move', (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`Tic Tac Toe app listening at http://localhost:${port}`);
+    console.log(`Allez sur http://localhost:${port} pour jouer.`);
 });
