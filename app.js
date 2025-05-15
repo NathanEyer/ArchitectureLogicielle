@@ -13,10 +13,28 @@ function checkWin(board, player) {
         [0, 3, 6], [1, 4, 7], [2, 5, 8], // colonnes
         [0, 4, 8], [2, 4, 6]             // diagonales
     ];
-    return lines.some(line =>
-        line.every(index => board[index] === player)
-    );
-    // Boucle vérifier qu'une des combinaisons est remplie dans board
+    // parcourir les lignes
+    // et vérifier si le joueur a gagné
+    // en vérifiant si toutes les cases de la ligne sont remplies par le joueur
+    // et si elles sont égales
+    // à la valeur du joueur
+    // Si une ligne est remplie par le joueur, il a gagné
+    // sinon, il n'a pas gagné
+  
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        let win = true;
+        for (let j = 0; j < line.length; j++) {
+            if (board[line[j]] !== player) {
+            win = false;
+            break;
+            }
+        }
+        if (win) {
+            return true;
+        }
+    }
+    return false;
 }
 
 // Vérifie qu'il reste des cases à remplir
