@@ -2,6 +2,9 @@ const express = require('express');
 const app = express();
 app.use(express.json());
 
+const cors = require('cors');
+app.use(cors());
+
 
 const port = 3000;
 
@@ -30,6 +33,8 @@ function checkWinner(board) {
 // Créer une partie
 app.post('/api/games', (req, res) => {
     const { playerX, playerO } = req.body;
+
+    console.log(req.body);
 
     let id = games_number++ ;
 
