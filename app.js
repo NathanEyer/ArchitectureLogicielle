@@ -1,111 +1,96 @@
 const express = require('express');
-const bodyParser = require('body-parser');
 const app = express();
+app.use(express.json());
+
+
 const port = 3000;
 
-app.set('view engine', 'ejs');
-app.use(bodyParser.urlencoded({ extended: true }));
+const games = {};  // JSON servant de mini-DB
+var games_number = 0; // counter pour faire les ID des parties
 
-// Vérifie si un joueur a gagné
-function checkWin(board, player) {
-    const lines = [
-        [0, 1, 2], [3, 4, 5], [6, 7, 8], // lignes
-        [0, 3, 6], [1, 4, 7], [2, 5, 8], // colonnes
-        [0, 4, 8], [2, 4, 6]             // diagonales
+// Vérifie si la partie est gagné
+function checkWinner(board) {
+    const winPatterns = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8],
+        [0, 3, 6], [1, 4, 7], [2, 5, 8],
+        [0, 4, 8], [2, 4, 6],
     ];
-    // parcourir les lignes
-    // et vérifier si le joueur a gagné
-    // en vérifiant si toutes les cases de la ligne sont remplies par le joueur
-    // et si elles sont égales
-    // à la valeur du joueur
-    // Si une ligne est remplie par le joueur, il a gagné
-    // sinon, il n'a pas gagné
-  
-    for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-        let win = true;
-        for (let j = 0; j < line.length; j++) {
-            if (board[line[j]] !== player) {
-            win = false;
-            break;
-            }
-        }
-        if (win) {
-            return true;
+    for (const [a, b, c] of winPatterns) {
+        if (board[a] === board[b] && board[b] === board[c]) {
+            return board[a];
         }
     }
-    return false;
+    return board.includes('') ? null : 'draw';
 }
 
-// Vérifie qu'il reste des cases à remplir
-function checkDraw(board) {
-    return board.every(cell => cell !== '');
-}
 
-app.get('/', (req, res) => {
-    res.redirect('/start');
+// API ---------------------------------------------------------------------------------
+
+
+// Créer une partie
+app.post('/api/games', (req, res) => {
+    const { playerX, playerO } = req.body;
+
+    let id = games_number++ ;
+
+    // remplit DB
+    games[id] = {
+        id,
+        board: Array(9).fill(''),
+        currentPlayer: 'X',
+        playerX,
+        playerO,
+        winner: null,
+        gameOver: false,
+    };
+
+    // return
+    res.status(201).json(games[id]);
 });
 
-app.get('/start', (req, res) => {
-    res.render('start'); // page EJS avec formulaire
-});
 
-// Chargement initial de la page 
-app.post('/start', (req, res) => {
-    const playerX = req.body.playerX.trim() !== '' ? req.body.playerX : 'Joueur X';
-    const playerO = req.body.playerO.trim() !== '' ? req.body.playerO : 'Joueur O';
-    const board = ['', '', '', '', '', '', '', '', ''];
-    const currentPlayer = 'X';
-    const message = `La partie commence : ${playerX} commence.`;
+// Jouer un coup
+app.put('/api/games/:id', (req, res) => {
+    const game = games[req.params.id];
 
-    res.render('index', { board, currentPlayer, message, gameOver: false, playerX, playerO });
-});
+    if (!game) return res.status(404).json({ error: "Partie introuvable." });
 
-// POST route - enregistre les actions en direct
-app.post('/move', (req, res) => {
-    let board = [];
-    for (let i = 0; i < 9; i++) {
-        board[i] = req.body['cell' + i] || '';
+    if (game.gameOver) return res.status(400).json({ error: "Partie terminée." });
+
+    const { position, player } = req.body;
+    if (player !== game.currentPlayer) {
+        return res.status(400).json({ error: `Ce n'est pas au tour de ${player}.` });
+    }
+    if (position < 0 || position > 8 || game.board[position] !== '') {
+        return res.status(400).json({ error: "Coup invalide." });
     }
 
-    // Initialisations
-    let message = '';
-    let gameOver = false;
+    game.board[position] = player;
+    const winner = checkWinner(game.board);
 
-    // Récupération des constantes
-    const playerX = req.body.playerX;
-    const playerO = req.body.playerO;
-    const currentPlayer = req.body.currentPlayer;
-    const moveIndex = parseInt(req.body.move);
-
-    // Si le jeu n'est pas fini
-    if (board[moveIndex] === '') {
-        board[moveIndex] = currentPlayer;
-
-        // Vérifications de l'état de la partie
-        if (checkWin(board, currentPlayer)) {
-            const winnerName = currentPlayer === 'X' ? playerX : playerO;
-            message = `${winnerName} (${currentPlayer}) a gagné !`;
-            gameOver = true;
-        } else if (checkDraw(board)) {
-            message = `Égalité !`;
-            gameOver = true;
-        } else {
-            message = `${currentPlayer} posé.`;
-            const nextPlayerName = currentPlayer === 'X' ? playerO : playerX;
-            message += ` Le prochain à jouer sera ${nextPlayerName}.`;
-        }
+    if (winner) {
+        game.winner = winner === 'draw' ? null : winner;
+        game.gameOver = true;
     } else {
-        message = "Opération non permise.";
+        game.currentPlayer = player === 'X' ? 'O' : 'X';
     }
 
-    // Prochain joueur à jouer
-    const nextPlayer = gameOver ? null : (currentPlayer === 'X' ? 'O' : 'X');
-
-    res.render('index', { board, currentPlayer: nextPlayer, message, gameOver, playerX, playerO });
+    res.json(game);
 });
 
-// Affichage du lien du jeu
+
+// Récupérer une partie
+app.get('/api/games/:id', (req, res) => {
+    const game = games[req.params.id];
+    if (!game) return res.status(404).json({ error: "Partie introuvable." });
+    res.json(game);
+});
+
+
+// ----------------------------------------------------------------------------------------------------------
+
+
+// Lance le serveur
 app.listen(port, () => {
-    console.log(`Allez sur http://localhost:${port} pour jouer.`);
+  console.log(`API en écoute sur http://localhost:${port}`);
 });
