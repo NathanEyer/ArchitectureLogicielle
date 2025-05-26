@@ -2,6 +2,9 @@ const express = require('express');
 const app = express();
 app.use(express.json());
 
+const cors = require('cors');
+app.use(cors());
+
 
 const port = 3000;
 
@@ -51,7 +54,8 @@ app.post('/api/games', (req, res) => {
 
 // Jouer un coup
 app.put('/api/games/:id', (req, res) => {
-    const game = games[req.params.id];
+    
+	const game = games[req.params.id];
 
     if (!game) return res.status(404).json({ error: "Partie introuvable." });
 
@@ -74,7 +78,6 @@ app.put('/api/games/:id', (req, res) => {
     } else {
         game.currentPlayer = player === 'X' ? 'O' : 'X';
     }
-
     res.json(game);
 });
 
