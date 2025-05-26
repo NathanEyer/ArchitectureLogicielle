@@ -6,11 +6,7 @@ Adrien Mangin
 
 ## Morpion en Node JS
 
-Ce projet est un jeu de morpion codé en Node JS afin de manipuler le server-side rendering sur un serveur web.
-
-## Conception 
-
-La conception du projet est présenté dans le dossier conception du répôt.
+Ce projet est un jeu de morpion codé en Node JS et React
 
 ## Dépendances :
 
@@ -20,7 +16,7 @@ ExpressJS
 
 body-parser
 
-## Installation
+## Installation et lancement
 
 BACKEND
 
@@ -33,7 +29,3 @@ FRONTEND
 npm install
 
 npm run dev
-
-## Lancer le projet
-
-node app.js
