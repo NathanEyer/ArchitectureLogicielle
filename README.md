@@ -22,7 +22,17 @@ body-parser
 
 ## Installation
 
-nmp install express body-parser ejs
+BACKEND
+
+npm install
+
+node app.js
+
+FRONTEND
+
+npm install
+
+npm run dev
 
 ## Lancer le projet
 
