@@ -32,7 +32,6 @@ function checkWinner(board) {
 
 // Créer une partie
 app.post('/api/games', (req, res) => {
-    const { playerX, playerO } = req.body;
 
     let id = games_number++ ;
 
@@ -41,13 +40,10 @@ app.post('/api/games', (req, res) => {
         id,
         board: Array(9).fill(''),
         currentPlayer: 'X',
-        playerX,
-        playerO,
         winner: null,
         gameOver: false,
     };
 
-    // return
     res.status(201).json(games[id]);
 });
 
